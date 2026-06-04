@@ -34,20 +34,71 @@ class _MovementsScreenState extends ConsumerState<MovementsScreen> {
 
     setState(() => _isSaving = true);
     try {
-      await ref
-          .read(stockRepositoryProvider)
-          .addMovement(
-            clientId: ref.read(clientIdProvider),
-            product: product,
-            type: _type,
-            quantity: quantity,
-          );
+      final firebaseReady = ref.read(firebaseReadyProvider);
+      if (firebaseReady) {
+        await ref
+            .read(stockRepositoryProvider)
+            .addMovement(
+              clientId: ref.read(clientIdProvider),
+              product: product,
+              type: _type,
+              quantity: quantity,
+            );
+      } else {
+        _saveDemoMovement(product, quantity);
+      }
       _quantity.text = '1';
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);
       }
     }
+  }
+
+  void _saveDemoMovement(Product product, int quantity) {
+    final delta = _type == MovementType.entry ? quantity : -quantity;
+    final nextQuantity = product.quantity + delta;
+
+    if (nextQuantity < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Stock insuffisant pour cette vente.')),
+      );
+      return;
+    }
+
+    final updatedProduct = Product(
+      id: product.id,
+      name: product.name,
+      categoryId: product.categoryId,
+      categoryName: product.categoryName,
+      quantity: nextQuantity,
+      threshold: product.threshold,
+      unitPrice: product.unitPrice,
+      createdAt: product.createdAt,
+    );
+
+    ref.read(demoProductsProvider.notifier).state = ref
+        .read(demoProductsProvider)
+        .map((item) => item.id == product.id ? updatedProduct : item)
+        .toList();
+
+    final movement = StockMovement(
+      id: 'mov-${DateTime.now().microsecondsSinceEpoch}',
+      productId: product.id,
+      productName: product.name,
+      categoryId: product.categoryId,
+      categoryName: product.categoryName,
+      type: _type,
+      quantity: quantity,
+      unitPrice: product.unitPrice,
+      createdAt: DateTime.now(),
+    );
+
+    ref.read(demoMovementsProvider.notifier).state = [
+      movement,
+      ...ref.read(demoMovementsProvider),
+    ];
+    _selectedProduct = updatedProduct;
   }
 
   @override

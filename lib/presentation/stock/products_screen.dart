@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/models/category.dart';
 import '../../domain/models/product.dart';
 import '../../providers/app_providers.dart';
 
@@ -35,15 +36,20 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
     setState(() => _isSaving = true);
     try {
-      await ref
-          .read(stockRepositoryProvider)
-          .createProduct(
-            clientId: ref.read(clientIdProvider),
-            name: _name.text,
-            categoryName: _category.text,
-            threshold: int.parse(_threshold.text),
-            unitPrice: double.parse(_price.text.replaceAll(',', '.')),
-          );
+      final firebaseReady = ref.read(firebaseReadyProvider);
+      if (firebaseReady) {
+        await ref
+            .read(stockRepositoryProvider)
+            .createProduct(
+              clientId: ref.read(clientIdProvider),
+              name: _name.text,
+              categoryName: _category.text,
+              threshold: int.parse(_threshold.text),
+              unitPrice: double.parse(_price.text.replaceAll(',', '.')),
+            );
+      } else {
+        _saveDemoProduct();
+      }
       _name.clear();
       _category.clear();
       _threshold.text = '5';
@@ -53,6 +59,43 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         setState(() => _isSaving = false);
       }
     }
+  }
+
+  void _saveDemoProduct() {
+    final categories = ref.read(demoCategoriesProvider);
+    final categoryName = _category.text.trim();
+    final normalizedCategory = categoryName.toLowerCase();
+    var category = categories
+        .where((item) => item.name.trim().toLowerCase() == normalizedCategory)
+        .firstOrNull;
+
+    if (category == null) {
+      category = Category(
+        id: 'cat-${DateTime.now().microsecondsSinceEpoch}',
+        name: categoryName,
+        createdAt: DateTime.now(),
+      );
+      ref.read(demoCategoriesProvider.notifier).state = [
+        ...categories,
+        category,
+      ];
+    }
+
+    final product = Product(
+      id: 'prod-${DateTime.now().microsecondsSinceEpoch}',
+      name: _name.text.trim(),
+      categoryId: category.id,
+      categoryName: category.name,
+      quantity: 0,
+      threshold: int.parse(_threshold.text),
+      unitPrice: double.parse(_price.text.replaceAll(',', '.')),
+      createdAt: DateTime.now(),
+    );
+
+    ref.read(demoProductsProvider.notifier).state = [
+      ...ref.read(demoProductsProvider),
+      product,
+    ];
   }
 
   @override

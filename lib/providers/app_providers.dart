@@ -24,6 +24,18 @@ final stockRepositoryProvider = Provider<StockRepository>((ref) {
   return StockRepository(FirestoreStockService(FirebaseFirestore.instance));
 });
 
+final demoCategoriesProvider = StateProvider<List<Category>>((ref) {
+  return const <Category>[];
+});
+
+final demoProductsProvider = StateProvider<List<Product>>((ref) {
+  return const <Product>[];
+});
+
+final demoMovementsProvider = StateProvider<List<StockMovement>>((ref) {
+  return const <StockMovement>[];
+});
+
 final authStateProvider = StreamProvider<User?>((ref) {
   final firebaseReady = ref.watch(firebaseReadyProvider);
   if (!firebaseReady) {
@@ -40,7 +52,7 @@ final clientIdProvider = Provider<String>((ref) {
 final productsProvider = StreamProvider<List<Product>>((ref) {
   final firebaseReady = ref.watch(firebaseReadyProvider);
   if (!firebaseReady) {
-    return Stream.value(const <Product>[]);
+    return Stream.value(ref.watch(demoProductsProvider));
   }
   return ref
       .watch(stockRepositoryProvider)
@@ -50,7 +62,7 @@ final productsProvider = StreamProvider<List<Product>>((ref) {
 final categoriesProvider = StreamProvider<List<Category>>((ref) {
   final firebaseReady = ref.watch(firebaseReadyProvider);
   if (!firebaseReady) {
-    return Stream.value(const <Category>[]);
+    return Stream.value(ref.watch(demoCategoriesProvider));
   }
   return ref
       .watch(stockRepositoryProvider)
@@ -60,7 +72,7 @@ final categoriesProvider = StreamProvider<List<Category>>((ref) {
 final movementsProvider = StreamProvider<List<StockMovement>>((ref) {
   final firebaseReady = ref.watch(firebaseReadyProvider);
   if (!firebaseReady) {
-    return Stream.value(const <StockMovement>[]);
+    return Stream.value(ref.watch(demoMovementsProvider));
   }
   return ref
       .watch(stockRepositoryProvider)
