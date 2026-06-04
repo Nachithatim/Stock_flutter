@@ -59,5 +59,5 @@ flutter test
 
 Resultat: analyse sans erreurs et tests valides.
 
-Temps utilise au moment du rapport: 11 minutes.
-Jetons consommes au moment du rapport: 109074.
+Temps utilise final: 12 minutes 28 secondes.
+Jetons consommes final: 121524.
