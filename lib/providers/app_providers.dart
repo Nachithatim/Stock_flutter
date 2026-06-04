@@ -2,10 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/network/dio_client.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/stock_repository.dart';
+import '../data/services/demo_stock_storage.dart';
 import '../data/services/firestore_stock_service.dart';
 import '../domain/models/category.dart';
 import '../domain/models/dashboard_stats.dart';
@@ -16,6 +18,8 @@ final firebaseReadyProvider = Provider<bool>((ref) => true);
 
 final dioClientProvider = Provider<DioClient>((ref) => DioClient());
 
+final sharedPreferencesProvider = Provider<SharedPreferences?>((ref) => null);
+
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(FirebaseAuth.instance);
 });
@@ -25,15 +29,15 @@ final stockRepositoryProvider = Provider<StockRepository>((ref) {
 });
 
 final demoCategoriesProvider = StateProvider<List<Category>>((ref) {
-  return const <Category>[];
+  return DemoStockStorage.loadCategories(ref.watch(sharedPreferencesProvider));
 });
 
 final demoProductsProvider = StateProvider<List<Product>>((ref) {
-  return const <Product>[];
+  return DemoStockStorage.loadProducts(ref.watch(sharedPreferencesProvider));
 });
 
 final demoMovementsProvider = StateProvider<List<StockMovement>>((ref) {
-  return const <StockMovement>[];
+  return DemoStockStorage.loadMovements(ref.watch(sharedPreferencesProvider));
 });
 
 final authStateProvider = StreamProvider<User?>((ref) {

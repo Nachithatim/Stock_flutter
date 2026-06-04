@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../data/services/demo_stock_storage.dart';
 import '../../domain/models/product.dart';
 import '../../domain/models/stock_movement.dart';
 import '../../providers/app_providers.dart';
@@ -77,10 +78,15 @@ class _MovementsScreenState extends ConsumerState<MovementsScreen> {
       createdAt: product.createdAt,
     );
 
-    ref.read(demoProductsProvider.notifier).state = ref
+    final products = ref
         .read(demoProductsProvider)
         .map((item) => item.id == product.id ? updatedProduct : item)
         .toList();
+    ref.read(demoProductsProvider.notifier).state = products;
+    DemoStockStorage.saveProducts(
+      ref.read(sharedPreferencesProvider),
+      products,
+    );
 
     final movement = StockMovement(
       id: 'mov-${DateTime.now().microsecondsSinceEpoch}',
@@ -94,10 +100,12 @@ class _MovementsScreenState extends ConsumerState<MovementsScreen> {
       createdAt: DateTime.now(),
     );
 
-    ref.read(demoMovementsProvider.notifier).state = [
-      movement,
-      ...ref.read(demoMovementsProvider),
-    ];
+    final movements = [movement, ...ref.read(demoMovementsProvider)];
+    ref.read(demoMovementsProvider.notifier).state = movements;
+    DemoStockStorage.saveMovements(
+      ref.read(sharedPreferencesProvider),
+      movements,
+    );
     _selectedProduct = updatedProduct;
   }
 

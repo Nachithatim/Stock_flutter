@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/services/demo_stock_storage.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/product.dart';
 import '../../providers/app_providers.dart';
@@ -79,6 +80,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         ...categories,
         category,
       ];
+      DemoStockStorage.saveCategories(
+        ref.read(sharedPreferencesProvider),
+        ref.read(demoCategoriesProvider),
+      );
     }
 
     final product = Product(
@@ -92,10 +97,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
       createdAt: DateTime.now(),
     );
 
-    ref.read(demoProductsProvider.notifier).state = [
-      ...ref.read(demoProductsProvider),
-      product,
-    ];
+    final products = [...ref.read(demoProductsProvider), product];
+    ref.read(demoProductsProvider.notifier).state = products;
+    DemoStockStorage.saveProducts(
+      ref.read(sharedPreferencesProvider),
+      products,
+    );
   }
 
   @override
