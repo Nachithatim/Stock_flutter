@@ -36,10 +36,12 @@ class DashboardStats {
     required DateTime start,
     required DateTime end,
   }) {
+    final startOfDay = DateTime(start.year, start.month, start.day);
+    final endOfDay = DateTime(end.year, end.month, end.day, 23, 59, 59, 999);
     final sales = movements.where((movement) {
       final inRange =
-          !movement.createdAt.isBefore(start) &&
-          !movement.createdAt.isAfter(end);
+          !movement.createdAt.isBefore(startOfDay) &&
+          !movement.createdAt.isAfter(endOfDay);
       return movement.type == MovementType.sale && inRange;
     });
 
