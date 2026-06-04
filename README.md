@@ -59,5 +59,20 @@ flutter test
 
 Resultat: analyse sans erreurs et tests valides.
 
+## Lancement demo web
+
+Pour garder les donnees locales apres redemarrage, lancer toujours Chrome avec
+le meme port:
+
+```powershell
+.\run_demo.ps1
+```
+
+Ou directement:
+
+```powershell
+flutter run -d chrome --web-port 63006
+```
+
 Temps utilise final: 12 minutes 28 secondes.
 Jetons consommes final: 121524.
