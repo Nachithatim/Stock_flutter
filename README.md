@@ -1,17 +1,63 @@
-# stock_flutter
+# Stock Flutter
 
-A new Flutter project.
+Application Flutter SaaS simplifiee de gestion de stock.
 
-## Getting Started
+## Fonctionnalites
 
-This project is a starting point for a Flutter application.
+- Authentification email/mot de passe avec Firebase Authentication.
+- Donnees Firestore isolees par client dans `tenants/{uid}`.
+- Gestion des produits par categorie avec creation automatique de categorie.
+- Entrees en stock et ventes avec transaction Firestore.
+- Dashboard par plage de dates:
+  - etat de stock;
+  - produits les plus vendus;
+  - ventes par categorie;
+  - produits sous le seuil d'approvisionnement.
 
-A few resources to get you started if this is your first Flutter project:
+## Pile technique
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Flutter
+- GoRouter
+- Riverpod
+- Dio
+- Firebase Auth
+- Cloud Firestore
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Architecture
+
+Le code suit une organisation DDDA simple:
+
+- `lib/domain/models`: objets metier.
+- `lib/data/services`: acces Firestore.
+- `lib/data/repositories`: orchestration data.
+- `lib/providers`: injection Riverpod.
+- `lib/presentation`: ecrans et widgets.
+- `lib/core`: router, theme et reseau.
+
+## Firebase
+
+Executer la configuration Firebase avant lancement reel:
+
+```bash
+flutterfire configure
+```
+
+Puis activer Email/Password dans Firebase Authentication et publier les regles:
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+## Validation
+
+Commandes executees:
+
+```bash
+flutter analyze
+flutter test
+```
+
+Resultat: analyse sans erreurs et tests valides.
+
+Temps utilise au moment du rapport: 11 minutes.
+Jetons consommes au moment du rapport: 109074.
