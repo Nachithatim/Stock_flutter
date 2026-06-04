@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1040579001089",
+    "project_id": "stock-flutter-nachit-hatim",
+    "storage_bucket": "stock-flutter-nachit-hatim.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1040579001089:android:7b26e039119c069b76f900",
+        "android_client_info": {
+          "package_name": "com.example.stock_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZYHMn2iwRQwkcWvTRgvHxVNP8PRpI8yw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'firebase_options.dart';
 import 'providers/app_providers.dart';
 
 Future<void> main() async {
@@ -11,7 +12,9 @@ Future<void> main() async {
 
   var firebaseReady = true;
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } on Object {
     firebaseReady = false;
   }

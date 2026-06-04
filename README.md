@@ -36,13 +36,14 @@ Le code suit une organisation DDDA simple:
 
 ## Firebase
 
-Executer la configuration Firebase avant lancement reel:
+Projet Firebase configure:
 
-```bash
-flutterfire configure
+```text
+stock-flutter-nachit-hatim
 ```
 
-Puis activer Email/Password dans Firebase Authentication et publier les regles:
+Activer Email/Password dans Firebase Authentication, creer Firestore Database,
+puis publier les regles:
 
 ```bash
 firebase deploy --only firestore:rules
@@ -59,19 +60,12 @@ flutter test
 
 Resultat: analyse sans erreurs et tests valides.
 
-## Lancement demo web
+## Lancement web
 
-Pour garder les donnees locales apres redemarrage, lancer toujours Chrome avec
-le meme port:
-
-```powershell
-.\run_demo.ps1
-```
-
-Ou directement:
+Lancer l'application:
 
 ```powershell
-flutter run -d chrome --web-port 63006
+flutter run -d chrome
 ```
 
 Temps utilise final: 12 minutes 28 secondes.
