@@ -1,0 +1,174 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+
+import '../../domain/models/product.dart';
+import '../../domain/models/stock_movement.dart';
+import '../../providers/app_providers.dart';
+
+class MovementsScreen extends ConsumerStatefulWidget {
+  const MovementsScreen({super.key});
+
+  @override
+  ConsumerState<MovementsScreen> createState() => _MovementsScreenState();
+}
+
+class _MovementsScreenState extends ConsumerState<MovementsScreen> {
+  final _quantity = TextEditingController(text: '1');
+  MovementType _type = MovementType.entry;
+  Product? _selectedProduct;
+  var _isSaving = false;
+
+  @override
+  void dispose() {
+    _quantity.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveMovement() async {
+    final product = _selectedProduct;
+    final quantity = int.tryParse(_quantity.text);
+    if (product == null || quantity == null || quantity <= 0) {
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    try {
+      await ref
+          .read(stockRepositoryProvider)
+          .addMovement(
+            clientId: ref.read(clientIdProvider),
+            product: product,
+            type: _type,
+            quantity: quantity,
+          );
+      _quantity.text = '1';
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final products = ref.watch(productsProvider).value ?? const <Product>[];
+    final movements = ref.watch(movementsProvider);
+
+    if (_selectedProduct == null && products.isNotEmpty) {
+      _selectedProduct = products.first;
+    }
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Mouvement de stock',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 12),
+                SegmentedButton<MovementType>(
+                  segments: const [
+                    ButtonSegment(
+                      value: MovementType.entry,
+                      label: Text('Entree'),
+                      icon: Icon(Icons.call_received),
+                    ),
+                    ButtonSegment(
+                      value: MovementType.sale,
+                      label: Text('Vente'),
+                      icon: Icon(Icons.point_of_sale),
+                    ),
+                  ],
+                  selected: {_type},
+                  onSelectionChanged: (value) =>
+                      setState(() => _type = value.first),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<Product>(
+                  initialValue: products.contains(_selectedProduct)
+                      ? _selectedProduct
+                      : null,
+                  decoration: const InputDecoration(labelText: 'Produit'),
+                  items: products
+                      .map(
+                        (product) => DropdownMenuItem(
+                          value: product,
+                          child: Text('${product.name} (${product.quantity})'),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) =>
+                      setState(() => _selectedProduct = value),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _quantity,
+                  decoration: const InputDecoration(labelText: 'Quantite'),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: _isSaving || products.isEmpty
+                      ? null
+                      : _saveMovement,
+                  icon: const Icon(Icons.save_outlined),
+                  label: Text(
+                    _type == MovementType.entry
+                        ? 'Entrer en stock'
+                        : 'Valider la vente',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text('Historique', style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 8),
+        movements.when(
+          data: (items) => items.isEmpty
+              ? const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text('Aucun mouvement.'),
+                )
+              : Column(
+                  children: items
+                      .map((movement) => _MovementTile(movement))
+                      .toList(),
+                ),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Text('Erreur: $error'),
+        ),
+      ],
+    );
+  }
+}
+
+class _MovementTile extends StatelessWidget {
+  const _MovementTile(this.movement);
+
+  final StockMovement movement;
+
+  @override
+  Widget build(BuildContext context) {
+    final formatter = DateFormat('dd/MM/yyyy HH:mm');
+    final isSale = movement.type == MovementType.sale;
+    return Card(
+      child: ListTile(
+        leading: Icon(isSale ? Icons.trending_down : Icons.trending_up),
+        title: Text(movement.productName),
+        subtitle: Text(
+          '${movement.categoryName} - ${formatter.format(movement.createdAt)}',
+        ),
+        trailing: Text('${isSale ? '-' : '+'}${movement.quantity}'),
+      ),
+    );
+  }
+}
